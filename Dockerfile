@@ -1,6 +1,13 @@
-FROM python:slim
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt requirements.txt
+RUN pip install --upgrade pip setuptools wheel
 RUN pip install -r requirements.txt
 RUN pip install gunicorn pymysql cryptography
 
@@ -9,8 +16,9 @@ COPY migrations migrations
 COPY microblog.py config.py boot.sh ./
 RUN chmod a+x boot.sh
 
-ENV FLASK_APP microblog.py
+ENV FLASK_APP=microblog.py
 RUN flask translate compile
 
 EXPOSE 5000
 ENTRYPOINT ["./boot.sh"]
+
